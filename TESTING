@@ -1,0 +1,183 @@
+Test eko.com to see how the cout and cin interface work.
+
+Usage:
+
+eko
+
+cin is a branch vector in CP/M to read one character from
+the keyboard, with wait and with no echo.  The output from
+the keyboard is returned in the A register.
+
+cout is a branch vector in CP/M to write one character to
+the console, with wrap around and scrolling.  The input to
+cout is received in the A register.
+
+----------------------------------------------------------
+
+Test rlca.com to see how the rlca instruction works in practice.
+
+Usage:
+
+rlca
+
+Each loop in the program uses the rlca instruction to
+rotate a one bit one bit to the left in the A register
+with carry.  In other words hex 80h rotates to hex 01h
+because of rotation with carry.
+
+The program pauses at the end of each loop, waiting for
+a key to be pressed on the keyboard.  Terminate the program
+by entering CTL-Z on the keyboard.
+
+The output will look like:
+
+01 02 04 08 10 20 40 80 01 etc
+
+The display is in hex.
+
+----------------------------------------------------------
+
+Test rrca.com to see how the rrca instruction works in practice.
+
+Usage:
+
+rrca
+
+Each loop in the program uses the rrca instruction to
+rotate a one bit one bit to the right in the A register
+with carry.  In other words hex 01h rotates to hex 80h
+because of rotation with carry.
+
+The program pauses at the end of each loop, waiting for
+a key to be pressed on the keyboard.  Terminate the program
+by entering CTL-Z on the keyboard.
+
+The output will look like:
+
+80 40 20 10 08 04 02 01 80 etc
+
+The display is in hex.
+
+----------------------------------------------------------
+
+Test ascii.com to display the ASCII character set in
+rows of 16 characters.
+
+Usage:
+
+ascii
+
+From the output display, it is easy to calculate the
+hex value of each character.  The first row begins with
+hex 020h, a space.  The last character on the first row
+is hex 02fh, a forward slash.  The next row starts with
+030h and ends with 03fh, etc.
+
+The program ends after the 7th row is displayed.
+
+----------------------------------------------------------
+
+Test hx.com to dump memory at a location in hex, specified
+by an input parameter.
+
+Usage:
+
+hx address
+
+Example:
+
+hx f000
+
+In this example, Z80 memory is dumped in hex starting at location
+0f000h.  16 bytes are dumped on each line, with the current
+address as the first word in hex.
+
+The program pauses after each line, waiting for a key to
+be pressed on the keyboard.  Hold a key down to cause the
+memory dump to proceed continuously.
+
+Terminate the program by entering CTL-Z.
+
+The error message for a missing parameter is "0 ?".
+The error message for an invalid address is "X ?",
+where X is an invalid character.
+
+----------------------------------------------------------
+
+Test randu.com to produce a random number generator seed
+after n generations.
+
+Usage:
+
+randu #generations
+
+Where #generations is 1 to 65535.
+
+Example:
+
+randu 500
+
+In this example, the random number generator displays the
+seed in hex after running for 500 generations.
+
+The initial seed is set to 1.
+
+By examining the source code for this program, you can see
+how the RANDU random number generator is implemented on an
+8-bit computer, in this case, a Z80.  The label name for
+the generator is rnd:.  The seed is called sd:.
+
+The RANDU random number generator is very simple to implement,
+and very fast, by comparison to ranlxd2.  But RANDU fails
+to pass randomness tests.  The output of RANDU is a 32-bit
+unsigned integer seed.  The low order bits of the seed are
+by no means random.  The high order bits of the seed also
+fail randomness tests.
+
+The RANDU random number generator is an easy algorithm to
+scale up in size.  In this program, the seed is 32 bits.
+But it is easy to have a seed of 512 bits using the same
+algorithm.  When you only use the high order bit of a 512
+bit seed, the random number generator is somewhat more
+random, but it is 32*16 = 512 times slower than this generator.
+On todays computers, speed is not as critical, because today's
+computers run so fast.
+
+For scientific testing, taus, KISS, and the Mersenne Twister
+are examples of fast random number generators that pass
+randomness tests.
+
+See the etaus, ekiss, and erandu repositories for long
+running versions of three random number generators.
+
+The output of this program matches the output of a C program,
+called z80rnd.c, also in this repository.  z80rnd is run
+on Linux, not on the Z80.
+
+----------------------------------------------------------
+
+Test z80rnd to match the results of randu.com in the C
+language.
+
+Usage:
+
+./z80rnd #generations
+
+Where #generations is 1 to 65535.
+
+Example:
+
+./z80rnd 500
+
+In this example, the output shows two versions of the seed
+in big endian and little endian format after 500 generations.
+
+----------------------------------------------------------
+
+See INSTALL for installing this repository on your computer.
+
+See README.z80 for general information about this repository.
+
+This website for this repository is called
+
+http://aquila62.github.io

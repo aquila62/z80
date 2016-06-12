@@ -1,0 +1,45 @@
+Unzip the zip file z80-master.zip
+
+Change directory to z80-master
+
+chmod 700 *.sh
+
+inst.sh
+
+------------------------------------------------
+
+Installing the yaze Z80 emulator.
+
+Download the yaze Z80 emulator from:
+
+ftp://ftp.ping.de/pub/misc/emulators/yaze-1.14.tar.gz
+
+Untar the tarball.
+
+tar xzf yaze-1.14.tar.gz
+
+Change directory to yaze-1.14.
+
+Run the make command.
+
+Makefile creates a program, called yaze.
+
+Run yaze.
+
+You will see the A> prompt.
+
+Type in sys and enter.
+
+That will give you a dollar prompt $>
+
+Enter the command mount b z80-master
+
+The directory name is where your Z80 programs are.
+
+Enter the command go.
+
+You will see the A> prompt again.
+
+Change directory to B:
+
+Run your tests on the B: drive.
