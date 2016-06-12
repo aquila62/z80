@@ -1,0 +1,551 @@
+; randu.asm - Z80 CP/M randu RNG test  Version 1.0.0
+; Copyright (C) 2016 aquila62 at github.com
+
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License as
+; published by the Free Software Foundation; either version 2 of
+; the License, or (at your option) any later version.
+
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+; GNU General Public License for more details.
+
+; You should have received a copy of the GNU General Public License
+; along with this program; if not, write to:
+
+   ; Free Software Foundation, Inc.
+   ; 59 Temple Place - Suite 330
+   ; Boston, MA 02111-1307, USA.
+
+;--------------------------------------------------------
+; randu.com:
+; Test the randu algorithm in 8-bit Z80 emulation
+; print the seed after "kount" generations
+; This program illustrates how the randu algorithm
+; is very easy to implement on an 8-bit computer.
+; randu is a "uniform random number generator"
+; originally used by IBM during the 1960's.
+; randu produces an unsigned 32-bit integer,
+; called the seed.
+; There are two ways to calculate randu:
+; * by multiplying the seed by the constant 65539
+;   and truncating the product to 32-bits
+; * by shifting and adding to produce the same
+;   32-bit unsigned product
+; The period length of this version of randu is 2^30.
+; The randu algorithm is easily scalable to much
+; larger seeds, using the same algorithm.
+; There is a severe performance penalty for scaling up
+; the size of the seed, and therefore the period length, as well.
+; The performance of randu is O(n) linear based on seed size.
+; Furthermore if only the high order bit is used as the
+; output of the generator, the performance is 32 times worse.
+; Note: the standard IBM randu algorithm is modulus 2^31
+; on an IBM mainframe, not 2^32 here.
+; Although this algorithm differs from the IBM algorithm,
+; the resulting RNG has the same period length
+; relative to the modulus, and this version of randu is
+; as non-random as the standard IBM algorithm.
+; The lower 8 bits of the seed are not random.
+; The upper 8 bits of the seed are still not random.
+; randu fails many tests for randomness.
+; Therefore randu is an example of a bad random
+; number generator.
+; This program is used to verify the randu generator
+; in Z80 assembler.  This program runs in CP/M 2.2
+; using the yaze emulator.
+; Usage for this program is:
+;     randu n
+; Where n is 1 to 65535.
+; The seed is initialized to 01 00 00 00
+; in little endian hexadecimal format.
+; After 10000 generations, the seed is 41 03 C5 60
+; in little endian hexadecimal format.
+; In big endian format, the seed is 60C50341 hex.
+; See the C program z80rnd.c in this repository
+; for a comparison of both algorithms.
+; This program matches the output of z80rnd.c.
+; See the erandu repository at www.github.com/aquila62
+; for an extended, random version of the randu
+; algorithm.  erandu does pass randomness tests, whereas
+; this version of randu does not.
+; The etaus and ekiss random number generators at
+; www.github.com/aquila62
+; are much better random number generators.  They are:
+; * many times faster
+; * pass randomness tests
+; * have very long periods
+; Their algorithms are somewhat more complex to implement
+; on an 8-bit computer in assembler.
+;--------------------------------------------------------
+
+kcin:  equ 0006h       ; CP/M branch vector for keyboard input
+kcout: equ 0009h       ; CP/M branch vector for console  output
+   org 100h            ; CP/M start address
+   call getparm        ; convert count parameter to binary
+   call putkount       ; write count parameter in hex
+   call init           ; initialize the seed to 1
+   ld bc,(kount)       ; loop count
+lp:                    ; main loop for randu generations
+   call rnd            ; generate one generation of randu
+   ; decrement the loop counter
+   ld bc,(kount)
+   dec bc
+   ld (kount),bc
+   ; repeat loop if kount is not zero
+   ; if high order byte of kount is not zero, repeat loop
+   ld a,(kount+1)
+   cp 0
+   jp nz,lp
+   ; if low order byte of kount is not zero, repeat loop
+   ld a,(kount)
+   cp 0
+   jp nz,lp
+   ; end of loop: display the seed after kount generations
+   call shwsd
+eoj:        ; end of job, reset CP/M
+   jp 0h
+   nop
+   nop
+   nop
+   nop
+; randu algorithm for generating one generation of the seed
+; output is the 32-bit seed, called sd
+; sd is in little endian format
+; the high order bit is the high order bit of byte 3
+; relative to zero
+rnd:
+   push af
+   push bc
+   push de
+   push hl
+   ;--------------------------------------
+   ; part 1
+   ;--------------------------------------
+   scf
+   ccf
+   ld hl,sd
+   ld de,sd2
+   ld b,04h
+rnd1:
+   ld a,(hl)
+   rla
+   ld (de),a
+   inc hl
+   inc de
+   djnz rnd1
+   ;--------------------------------------
+   ; part 2
+   ;--------------------------------------
+   scf
+   ccf
+   ld hl,sd
+   ld de,sd+2
+   ld b,02h
+rnd2:
+   ld a,(de)
+   adc a,(hl)
+   ld (de),a
+   inc hl
+   inc de
+   djnz rnd2
+   ;--------------------------------------
+   ; part 3
+   ;--------------------------------------
+   scf
+   ccf
+   ld hl,sd2
+   ld de,sd
+   ld b,04h
+rnd3:
+   ld a,(de)
+   adc a,(hl)
+   ld (de),a
+   inc hl
+   inc de
+   djnz rnd3
+   ;--------------------------------------
+   ; end of part 3
+   ;--------------------------------------
+   pop hl
+   pop de
+   pop bc
+   pop af
+   ret
+;-----------------------------------------------------
+; display the seed in hexadecimal little endian format
+;-----------------------------------------------------
+shwsd:
+   push af
+   push bc
+   push hl
+   ld hl,sd
+   ld b,04h
+shwsdaa:
+   ld a,(hl)
+   call puthexa     ; display A register in hex
+   inc hl
+   djnz shwsdaa
+   call putspc      ; print trailing space
+   pop hl
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; display the work area in hexadecimal little endian format
+;----------------------------------------------------------
+shwsd2:
+   push af
+   push bc
+   push hl
+   ld hl,sd2
+   ld b,04h
+shwsd2bb:
+   ld a,(hl)
+   call puthexa
+   inc hl
+   djnz shwsd2bb
+   call putspc
+   pop hl
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; initialize the seed to 1
+;----------------------------------------------------------
+init:
+   push af
+   push bc
+   push hl
+;--------------------
+; set sd to all zeros
+;--------------------
+   ld hl,sd
+   xor a,a
+   ld b,16
+init2:
+   ld (hl),a
+   inc hl
+   djnz init2
+;---------------------
+; set sd2 to all zeros
+;---------------------
+   ld hl,sd2
+   xor a,a
+   ld b,16
+init3:
+   ld (hl),a
+   inc hl
+   djnz init3
+;----------------
+; set sd to 1
+;----------------
+   ld a,01h
+   ld hl,sd
+   ld (hl),a
+   pop hl
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; convert input parameter to binary
+; input parameter variable is called kount
+;----------------------------------------------------------
+getparm:
+   push af
+   push bc
+   push hl
+   xor a,a
+   ld (kount),a
+   ld (kount+1),a
+   ;---------------------------------------
+   ; check for missing parameter
+   ;---------------------------------------
+   ld a,(080h)
+   cp 02h
+   jp p,byp0
+   ld a,030h
+   jp baddgt
+byp0:
+   ld hl,081h
+   ld (prmch),hl
+; loop to bypass leading blanks
+byp1:
+   ld hl,(prmch)
+   ld a,(hl)
+   cp 020h
+   jp nz,prm2
+   inc hl
+   ld (prmch),hl
+   jp byp1
+; loop to convert decimal digits to binary
+; kount = (kount * 10) + digit
+prm2:
+   ld hl,(prmch)
+   ld a,(hl)
+   ; test for end of parameter
+   cp 0
+   jp z,prm3
+   cp 020h
+   jp z,prm3
+   ; convert digit from ASCII decimal to binary
+   call dec2bin
+   ; kount *= 10
+   ld bc,(kount)
+   ld (multiplicand),bc
+   ld a,10
+   ld (multiplier),a
+   call Mul8            ; 8-bit multiply  HL = DE * A
+   ld bc,(product)
+   ld (kount),bc
+   ; kount += digit
+   ld a,(bindgt)
+   ld c,a
+   ld b,0h
+   ld hl,(kount)
+   add hl,bc
+   ld (kount),hl
+   ; point to next digit in parameter
+   ld hl,(prmch)
+   inc hl
+   ld (prmch),hl
+   jp prm2          ; repeat parameter loop
+prm3:
+   ;---------------------------------------
+   ; Check kount for zero value
+   ;---------------------------------------
+   ld a,(kount)
+   cp 0
+   jp nz,prm4
+   ld a,(kount+1)
+   cp 0
+   jp nz,prm4
+   ld a,030h
+   jp baddgt          ; missing parameter error message 0 ?
+prm4:
+   pop hl
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; convert decimal digit from ASCII to binary
+; terminate if invalid digit 
+;----------------------------------------------------------
+dec2bin:           ; output in bindgt
+   push af
+   cp 030h
+   jp m,baddgt
+   cp 03ah
+   jp p,baddgt
+   sub 030h
+   ld (bindgt),a
+   pop af
+   ret
+;----------------------------------------------------------
+; invalid digit: terminate with message X ?
+; where X is the invalid digit
+;----------------------------------------------------------
+baddgt:
+   call cout           ; print invalid digit
+   call putspc         ; trailing space
+   ld a,'?'
+   call cout           ; print '?'
+   pop af              ; af was pushed in dec2bin
+   jp eoj              ; terminate program
+;----------------------------------------------------------
+; 8-bit multiply
+;----------------------------------------------------------
+Mul8:                  ; this routine performs the operation HL=DE*A
+   push af
+   push bc
+   push de
+   push hl
+   ld de,(multiplicand)
+   ld a,(multiplier)
+   ld hl,0             ; HL is used to accumulate the result
+   ld b,8              ; the multiplier (A) is 8 bits wide
+Mul8Loop:
+   rrca                ; putting the next bit into the carry
+   ; if zero, we skip the addition (jp is used for speed)
+   jp nc,Mul8Skip      ; if zero, we skip the addition
+   add hl,de           ; adding to the product if necessary
+Mul8Skip:
+   sla e               ; calculating the next auxiliary product by shifting
+   rl d                ; DE one bit leftwards (refer to the shift instructions!)
+   djnz Mul8Loop
+   ld (product),hl
+   pop hl
+   pop de
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; print kount in hexadecimal big endian format
+;----------------------------------------------------------
+putkount:
+   push af
+   ld a,(kount+1)
+   call puthex
+   ld a,(kount)
+   call puthex
+   call putspc
+   pop af
+   ret
+;----------------------------------------------------------
+; print A register in hexadecimal
+;----------------------------------------------------------
+puthexa:
+   call puthex
+   call putspc
+   ret
+;----------------------------------------------------------
+; print BC register in hexadecimal big endian format
+;----------------------------------------------------------
+putbc:
+   push af
+   ld a,b
+   call puthex
+   ld a,c
+   call puthex
+   call putspc
+   pop af
+   ret
+;----------------------------------------------------------
+; print HL register in hexadecimal big endian format
+;----------------------------------------------------------
+puthl:
+   push af
+   ld a,h
+   call puthex
+   ld a,l
+   call puthex
+   call putspc
+   pop af
+   ret
+;----------------------------------------------------------
+; print A register in hexadecimal
+;----------------------------------------------------------
+puthex:
+   push af
+   push bc
+   ld b,a
+   srl a
+   srl a
+   srl a
+   srl a
+   call putnbl
+   ld a,b
+   and 0fh
+   call putnbl
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; print 4 bit nibble in hexadecimal
+;----------------------------------------------------------
+putnbl:
+   push af
+   push bc
+   push hl
+   ld b,0
+   ld c,a
+   ld hl,hxtbl
+   add hl,bc
+   ld a,(hl)
+   call cout
+   pop hl
+   pop bc
+   pop af
+   ret
+;----------------------------------------------------------
+; print end of line as \r\n
+;----------------------------------------------------------
+puteol:
+   push af
+   ld a,13
+   call cout
+   ld a,10
+   call cout
+   pop af
+   ret
+;----------------------------------------------------------
+; print one space
+;----------------------------------------------------------
+putspc:
+   push af
+   ld a,020h
+   call cout
+   pop af
+   ret
+;----------------------------------------------------------
+; read keyboard with wait, without echo
+;----------------------------------------------------------
+cin:
+   push bc
+   push de
+   ld de,kcin
+   call ios
+   pop de
+   pop bc
+   ; returns character in reg a
+   ret
+;----------------------------------------------------------
+; print A register in ASCII to console
+;----------------------------------------------------------
+cout:
+   push bc
+   push de
+   push hl
+   ld c,a
+   ld de,kcout
+   call ios
+   pop hl
+   pop de
+   pop bc
+   ret
+;----------------------------------------------------------
+; CP/M input/output branch vector
+; return address is on stack
+; returns to caller of cin or cout
+;----------------------------------------------------------
+ios:
+   ld hl,(01h)
+   add hl,de
+   jp (hl)
+   nop
+   nop
+   nop
+   nop
+;----------------------------------------------------------
+; factors and product for 8-bit multiply
+;----------------------------------------------------------
+multiplier:   db 0,0
+multiplicand: dw 0,0
+product:      dw 0,0
+;----------------------------------------------------------
+; table for converting from binary to hex
+;----------------------------------------------------------
+hxtbl:  db '0123456789ABCDEF'
+;----------------------------------------------------------
+; randu seed and work area (sd2)
+;----------------------------------------------------------
+sd:     db 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+sd2:    db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;----------------------------------------------------------
+; generation count
+;----------------------------------------------------------
+kount:  dw 0
+;----------------------------------------------------------
+; pointer to parameter digit
+;----------------------------------------------------------
+prmch:  dw 0
+;----------------------------------------------------------
+; output binary digit from dec2bin subroutine
+;----------------------------------------------------------
+bindgt: db 0,0
+   nop
+   nop
+   nop
+   nop
+;---------------  end of program  -------------------------
