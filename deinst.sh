@@ -6,3 +6,4 @@ make -f rlca.mak clean
 make -f rrca.mak clean
 make -f randu.mak clean
 make -f z80rnd.mak clean
+make -f typ.mak clean
