@@ -319,16 +319,7 @@ ios:
 ; console messages
 ;
 nofile:
-	db 'no source file$'
-	db 0
-nodir:
-	db 'no directory space$'
-	db 0
-space:
-	db 'out of dat space$'
-	db 0
-normal:
-	db 'copy complete$'
+	db 'File not found.$'
 	db 0
 hxtbl:  db '0123456789ABCDEF'
 	db 0,0,0,0
