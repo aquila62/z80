@@ -217,6 +217,26 @@ in big endian and little endian format after 500 generations.
 
 ----------------------------------------------------------
 
+Run lfsr.com to test a linear feedback shift register.
+
+Usage:
+
+lfsr
+
+The output is a random bit stream in ASCII.
+The output stream is based on the seed.
+The program prompts for the seed by printing a '?'.
+Reply with any key from the keyboard.
+After entering two bytes from the keyboard, the program
+prints the output bit from the first cycle.  At the end
+of each cycle, the program pauses for a keyboard entry.
+Press 'q' to quit the program.
+
+This program uses a 16-bit LFSR.  The period length of
+this LFSR is (2^16)-1, or 65535.
+
+----------------------------------------------------------
+
 See INSTALL for installing this repository on your computer.
 
 See README.z80 for general information about this repository.

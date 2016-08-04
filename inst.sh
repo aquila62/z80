@@ -8,3 +8,4 @@ make -f randu.mak
 make -f z80rnd.mak
 make -f typ.mak
 make -f hxdmp.mak
+make -f lfsr.mak

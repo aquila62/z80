@@ -8,3 +8,4 @@ make -f randu.mak clean
 make -f z80rnd.mak clean
 make -f typ.mak clean
 make -f hxdmp.mak clean
+make -f lfsr.mak clean
