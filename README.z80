@@ -4,7 +4,8 @@ emulator, called yaze-1.14.  The website for yaze is at:
 
 ftp://ftp.ping.de/pub/misc/emulators/yaze-1.14.tar.gz
 
-Extract the files and compile them with the make command.
+Extract the files and compile them with the inst.sh script.
+De-install with the deinst.sh script.
 
 See INSTALL for instructions on installing these programs.
 
