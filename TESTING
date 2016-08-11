@@ -237,6 +237,20 @@ this LFSR is (2^16)-1, or 65535.
 
 ----------------------------------------------------------
 
+Run sieve.com to compute prime numbers from 3 to 2039
+using the Sieve of Eratosthenes algorithm.
+This program has been tested under CP/M 2.2 using the
+Yaze emulator.  The memory map is that used by Yaze.
+Wherever possible, 8080 opcodes are used in the source.
+
+Usage:
+
+sieve
+
+The output is a list of prime numbers from 3 to 2039.
+
+----------------------------------------------------------
+
 See INSTALL for installing this repository on your computer.
 
 See README.z80 for general information about this repository.

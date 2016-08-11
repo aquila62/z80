@@ -9,3 +9,4 @@ make -f z80rnd.mak
 make -f typ.mak
 make -f hxdmp.mak
 make -f lfsr.mak
+make -f sieve.mak
