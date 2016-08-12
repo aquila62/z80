@@ -285,7 +285,17 @@ shw:
    push af
    push bc
    push hl
-   ld hl,sv           ; point to beginning of sieve list
+   ; print the lowest numbers by hand
+   ; to ease the division logic in putdec
+   ld a,'2'
+   call coutspc
+   ld a,'3'
+   call coutspc
+   ld a,'5'
+   call coutspc
+   ld a,'7'
+   call coutspc
+   ld hl,sv+8           ; point to #11 in sieve list
    ld (addr),hl
 ; main print loop
 ; one iteration for each valid prime number
@@ -456,6 +466,7 @@ putdec:
    call clrstk         ; clear the stack to all zeros
 ; division loop
 putdec2:
+   ; set up the parameters in the division subroutine
    ld a,(num)
    ld (dvdnd),a
    ld a,(num+1)
@@ -516,6 +527,7 @@ putdec6:
    call cout
 ; print low order units digit
    ld a,(stk)
+putdec9:
    add a,030h
    call cout
    call putspc          ; print space
@@ -722,6 +734,14 @@ cin:
    pop de
    pop bc
    ; returns character in reg a
+   ret
+   ;---------------------------------------------
+   ; Print one ASCII byte to the console
+   ; followed by printing a space
+   ;---------------------------------------------
+coutspc:
+   call cout
+   call putspc
    ret
    ;---------------------------------------------
    ; Print one ASCII byte to the console
