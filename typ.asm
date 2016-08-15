@@ -137,7 +137,7 @@ putblk4:
 putblk5:
 	dec c               ; decrement block counter
 	ld a,c              ; compare from the A register
-	cp 0                ; test for end of block
+	or a                ; test for end of block
 	jp nz,putblk2       ; not end of block, print next character
 	pop hl              ; end of block, return
 	pop bc
