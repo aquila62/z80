@@ -11,3 +11,4 @@ make -f hxdmp.mak
 make -f lfsr.mak
 make -f sieve.mak
 make -f tower.mak
+make -f twr.mak

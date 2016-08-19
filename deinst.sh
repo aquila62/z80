@@ -11,3 +11,4 @@ make -f hxdmp.mak clean
 make -f lfsr.mak clean
 make -f sieve.mak clean
 make -f tower.mak clean
+make -f twr.mak clean

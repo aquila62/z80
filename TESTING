@@ -252,10 +252,10 @@ The output is a list of prime numbers from 3 to 2039.
 ----------------------------------------------------------
 
 Solve the Tower of Hanoi puzzle by running tower.com.
+tower.com uses an iterative algorithm to solve the puzzle.
 The object of this puzzle is to move all the disks from
 stack A to stack C, using stack B as the auxiliary stack.
 See the Wikipedia article for the Tower of Hanoi puzzle.
-This program is the iterative solution to the puzzle.
 
 Usage:
 
@@ -276,6 +276,36 @@ Press any other key to continue.
 The total number of moves is (2^n) - 1.
 
 For example, for 5 disks, the total number of moves is 31.
+
+----------------------------------------------------------
+
+Solve the Tower of Hanoi puzzle by running twr.com.
+twr.com uses a recursive algorithm to solve the puzzle.
+The object of this puzzle is to move all the disks from
+stack A to stack C, using stack B as the auxiliary stack.
+See the Wikipedia article for the Tower of Hanoi puzzle.
+
+Usage:
+
+tower [#disks]
+
+Where #disks is 2-9.
+
+Default #disks is 3.
+
+The state is printed after every move.
+
+The final state is printed at the end.
+
+Press CTL-Z to quit.
+
+Press any other key to continue.
+
+The total number of moves is (2^n) - 1.
+
+For example, for 5 disks, the total number of moves is 31.
+
+----------------------------------------------------------
 
 ----------------------------------------------------------
 
