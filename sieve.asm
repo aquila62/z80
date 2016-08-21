@@ -35,8 +35,8 @@
 ; are changed to zero on the list.  Finally the numbers left
 ; over on the list are prime numbers.
 ;
-; The prime numbers left on the list are printed in big endian
-; decimal format.  Leading zeros are not printed.  Word wrap is
+; The prime numbers left on the list are printed in decimal
+; format.  Leading zeros are not printed.  Word wrap is
 ; not used.  Some numbers overflow onto a second line.
 ;
 ; One heuristic, that is not used in this program, is to start
@@ -120,22 +120,19 @@ lp:
    ; it is all the odd numbers from 3 to 2039
    ; place the next odd number in its ordinal
    ; place in the odd number array
-   ld a,(prm)
+   ld bc,(prm)
    ld hl,(addr)
-   ld (hl),a
+   ld (hl),c
    inc hl
-   ld a,(prm+1)
-   ld (hl),a
+   ld (hl),b
    inc hl
    ld (addr),hl
    ; add 2 to the current odd number
    ; to get the next odd number
-   ld a,(prm)
-   add a,2h
-   ld (prm),a
-   ld a,(prm+1)
-   adc a,0
-   ld (prm+1),a
+   ld bc,(prm)
+   inc bc
+   inc bc
+   ld (prm),bc
    ; check prm to see if end of list has been reached.
    ; 800 hex is 2048.
    ; all numbers are stored in little endian format
@@ -185,17 +182,11 @@ xout:
 ;-------------------------------------------------------
 xout1:
    ; point to the first multiple of prm
-   ; curadr is the pointer to the multiple
-   ld a,(gap)
-   ld b,a
-   ld a,(addr)
-   add a,b
-   ld (curadr),a
-   ld a,(gap+1)
-   ld b,a
-   ld a,(addr+1)
-   adc a,b
-   ld (curadr+1),a
+   ; curadr is the pointer to the first multiple
+   ld bc,(gap)
+   ld hl,(addr)
+   add hl,bc
+   ld (curadr),hl
 ;-------------------------------------------------------
 ; inner loop to zero out multiples of primes
 ;-------------------------------------------------------
@@ -206,8 +197,7 @@ xout2:
    ld a,(hl)
    cp 0ffh
    jp z,xout3       ; yes, process next prime number
-; no, not end of list
-xout2b:
+xout2b:             ; no, not end of list
    ; zero out the current multiple of prm
    ld hl,(curadr)
    xor a
@@ -215,52 +205,41 @@ xout2b:
    inc hl
    ld (hl),a
    ; now point to the next multiple of prm
-   ld a,(gap)
-   ld b,a
-   ld a,(curadr)
-   add a,b
-   ld (curadr),a
-   ld a,(gap+1)
-   ld b,a
-   ld a,(curadr+1)
-   adc a,b
-   ld (curadr+1),a
+   ld bc,(gap)
+   ld hl,(curadr)
+   add hl,bc
+   ld (curadr),hl
    jp xout2             ; repeat inner loop
 ; add 2 to odd number prime prm
 ; add 4 to gap between multiples
 ; add 2 to starting address in sieve array
 xout3:
    ; add 2 to odd number prime prm
-   ld a,(prm)
-   add a,2
-   ld (prm),a
-   ld a,(prm+1)
-   adc a,0
-   ld (prm+1),a
+   ld bc,(prm)
+   inc bc
+   inc bc
+   ld (prm),bc
    ; add 4 to gap between multiples
-   ld a,(gap)
-   add a,4
-   ld (gap),a
-   ld a,(gap+1)
-   adc a,0
-   ld (gap+1),a
+   ld hl,(gap)
+   ld b,0h
+   ld c,4h
+   add hl,bc
+   ld (gap),hl
    ; add 2 to starting address in sieve array
    ; starting address is the address of the
    ; candidate prime number prm
-   ld a,(addr)
-   add a,2h
-   ld (addr),a
-   ld a,(addr+1)
-   adc a,0h
-   ld (addr+1),a
+   ld hl,(addr)
+   ld c,2h
+   ld b,0
+   add hl,bc
+   ld (addr),hl
    ; no more odd prime numbers to process?
    ld hl,(addr)
    inc hl
    ld a,(hl)
    cp 0ffh
    jp z,xout4         ; yes, print out prime number list
-; no, is current prime number candidate zero?
-xout3b:
+xout3b:        ; no, is current prime number candidate zero?
    ld hl,(addr)
    ld a,(hl)
    or a
