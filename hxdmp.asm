@@ -18,6 +18,7 @@
    ; 59 Temple Place - Suite 330
    ; Boston, MA 02111-1307, USA.
 
+;---------------------------------------------------------
 ; This program was inspired by the Digital Research sample
 ; file copy program
 ;
@@ -29,12 +30,13 @@
 ;
 ; Example:
 ;
-; typ typ.asm
+; hxdmp hx.com
 ;
 ; The program pauses after every 8 lines of output
 ;
 ; press CTL-Z to quit
-;
+;---------------------------------------------------------
+
 kcin:   equ 0006h     ; keyboard input routine
 kcout:  equ 0009h     ; console output routine
 boot:   equ 0000h     ; system reboot
