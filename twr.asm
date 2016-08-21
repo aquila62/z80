@@ -19,8 +19,8 @@
    ; Boston, MA 02111-1307, USA.
 
 ;--------------------------------------------------------------
-; This program performs the recursive solution to the Tower
-; of Hanoi computer puzzle.
+; This program implements the recursive solution to the Tower
+; of Hanoi computer puzzle in Z80 assembler.
 ;
 ; The source tower A has 2-9 disks.
 ; The target tower is tower C.
@@ -28,7 +28,7 @@
 ;
 ; Usage:
 ;
-; tower [n]
+; twr [n]
 ;
 ; Where n is the number of disks, 2-9
 ; Default is three disks.
@@ -36,7 +36,6 @@
 ; The object of this program is to move all the disks
 ; on stack A to stack C.
 ; See Wikipedia for the rules about the Tower of Hanoi.
-; This program implements the iterative solution to the problem.
 ;--------------------------------------------------------------
 
 kcin:  equ 0006h       ; CP/M jump vector for key input
