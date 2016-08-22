@@ -136,8 +136,10 @@ putspc:
 cin:
    push bc
    push de
+   push hl
    ld de,kcin
    call ios
+   pop hl
    pop de
    pop bc
    ; returns character in reg a
