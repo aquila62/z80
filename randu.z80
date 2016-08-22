@@ -1,4 +1,4 @@
-; randu.asm - Z80 CP/M randu RNG test  Version 1.0.0
+; randu.z80 - Z80 CP/M randu RNG test  Version 1.0.0
 ; Copyright (C) 2016 aquila62 at github.com
 
 ; This program is free software; you can redistribute it and/or
@@ -347,11 +347,30 @@ dec2bin:           ; output in bindgt
 ; where X is the invalid digit
 ;----------------------------------------------------------
 baddgt:
-   call cout           ; print invalid digit
-   call putspc         ; trailing space
-   ld a,'?'
-   call cout           ; print '?'
-   pop af              ; af was pushed in dec2bin
+   push af
+   push bc
+   push hl
+   ld hl,kerr
+bad2:
+   ld a,(hl)
+   or a
+   jp z,bad3
+   call cout
+   inc hl
+   jp bad2
+bad3:
+   ld hl,keg
+bad4:
+   ld a,(hl)
+   or a
+   jp z,bad5
+   call cout
+   inc hl
+   jp bad4
+bad5:
+   pop hl
+   pop bc
+   pop af
    jp eoj              ; terminate program
 ;----------------------------------------------------------
 ; 8-bit multiply
@@ -527,6 +546,8 @@ product:      dw 0,0
 ; table for converting from binary to hex
 ;----------------------------------------------------------
 hxtbl:  db '0123456789ABCDEF'
+kerr:   db 'Usage: randu count',13,10,0
+keg:    db 'Example: randu 4096',13,10,0
 ;----------------------------------------------------------
 ; randu seed and work area (sd2)
 ;----------------------------------------------------------

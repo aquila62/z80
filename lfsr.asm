@@ -53,18 +53,9 @@ bit3:  db 0            ; bit  1 of LFSR
 bit4:  db 0            ; bit  0 of LFSR
 ; translate table for printing a nybble in hex
 hxtbl:  db '0123456789ABCDEF'
+seedp:  db 'Enter seed: ',0
 strt:                  ; program starts here
-   ld a,'?'            ; prompt for seed[0]
-   call cout           ; print prompt
-   call cin            ; receive reply from kb
-   call cout           ; echo reply
-   ld (seed),a         ; store byte in seed[0]
-   ld a,'?'            ; prompt for seed[1]
-   call cout           ; print prompt
-   call cin            ; receive reply from kb
-   call cout           ; echo reply
-   call puteol         ; end of prompt, print eol
-   ld (seed+1),a       ; store byte in seed[1]
+   call getsd          ; prompt for seed, read seed
    ;---------------------------------------------
    ; copy seed to state
    ;---------------------------------------------
@@ -151,6 +142,8 @@ lp:
    call cin
    cp 'q'         ; if 'q' is entered
    jp z,eoj       ; quit
+   cp 01ah        ; if CTL-Z is entered
+   jp z,eoj       ; quit
    ;---------------------------------------------
    ; Shift the 16-bit state one bit to the right
    ;---------------------------------------------
@@ -182,6 +175,38 @@ eoj:
    nop
    nop
    nop
+   ;---------------------------------------------
+   ; Prompt for seed
+   ; Read seed from keyboard
+   ;---------------------------------------------
+getsd:
+   push af
+   push bc
+   push hl
+   ld hl,seedp
+.sd2:
+   ld a,(hl)
+   or a
+   jp z,.sd3
+   call cout
+   inc hl
+   jp .sd2
+.sd3:
+   call cin
+   cp 01ah
+   jp z,eoj
+   ld (seed),a
+   call cout
+   call cin
+   cp 01ah
+   jp z,eoj
+   ld (seed+1),a
+   call cout
+   call puteol
+   pop hl
+   pop bc
+   pop af
+   ret
    ;---------------------------------------------
    ; Translate a bit to ASCII and print to the
    ; console.
